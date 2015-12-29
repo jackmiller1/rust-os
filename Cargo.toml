@@ -1,0 +1,11 @@
+[package]
+name = "jack_os"
+version = "0.1.0"
+authors = ["Jack Miller <jlmille3@illinois.edu>"]
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "0.1.4"
+spin = "0.3.4"
