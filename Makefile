@@ -1,5 +1,5 @@
 arch ?= x86_64
-target ?= $(arch)-unknown-linux-gnu
+target ?= $(arch)-unknown-none-gnu
 kernel := build/kernel-$(arch).bin
 iso := build/os-$(arch).iso
 

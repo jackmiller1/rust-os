@@ -6,6 +6,19 @@ const SCREEN_HEIGHT: usize = 25;
 const SCREEN_WIDTH: usize = 80;
 const TEXT_BUFFER: usize = 0xb8000;
 
+// struct Size {
+//     width: usize,
+//     height: usize
+// }
+
+// struct Vga {
+//     size: Size,
+//     buffer: usize,
+//     // Add Ports
+// }
+
+
+
 pub static WRITER: Mutex<Writer> = Mutex::new(Writer {
     cursor: Cursor{ row: 0, col: 0 },
     color_code: ColorCode::new(Color::LightGreen, Color::Black),
@@ -48,9 +61,20 @@ pub fn clear_screen() {
     }
 }
 
-pub struct Cursor {
-    pub row: usize,
-    pub col: usize
+struct Cursor {
+    row: usize,
+    col: usize
+}
+
+impl Cursor {
+
+    // pub fn update_vga(&self) {
+    //     let position: usize = (self.row*SCREEN_WIDTH) + self.col;
+    //     write_port(0x3D4, 0x0F);
+    //     write_port(0x3D5, (position & 0xFF) as u8);
+    //     write_port(0x3D4, 0x0E);
+    //     write_port(0x3D5, ((position >> 8) & 0xFF) as u8);
+    // }
 }
 
 #[derive(Clone, Copy)]
@@ -106,7 +130,7 @@ impl Writer {
         self.cursor.col = 0;
         self.cursor.row += 1;
     }
-
+    
     fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
             character: b' ',

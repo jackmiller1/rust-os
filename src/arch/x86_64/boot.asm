@@ -6,6 +6,7 @@ bits 32
 start:
     ; move to top of stack
     mov esp, stack_top
+    mov edi, ebx        ; place multiboot info into first arg for kmain
 
     call check_multiboot
     call check_cpuid
@@ -73,34 +74,39 @@ check_long_mode:
 
 
 set_up_page_tables:
-    ; map first PML4 entry to PDP table
-    mov eax, pdp_table
+    ; recursive map p4_table
+    mov eax, p4_table
     or eax, 0b11 ; present + writable
-    mov [pml4_table], eax
+    mov [p4_table + 511 * 8], eax
+
+    ; map first PML4 entry to PDP table
+    mov eax, p3_table
+    or eax, 0b11 ; present + writable
+    mov [p4_table], eax
 
     ; map first PDP entry to PD table
-    mov eax, pd_table
+    mov eax, p2_table
     or eax, 0b11 ; present + writable
-    mov [pdp_table], eax
+    mov [p3_table], eax
 
     ; map each PD table entry to a huge 4MiB page
     mov ecx, 0
-.map_pd_table:
+.map_p2_table:
     ; map ecx-th PD table entry to a huge page that starts at address (4MiB * ecx)
     mov eax, 0x400000  ; 4MiB
     mul ecx            ; start address of ecx-th page
     or eax, 0b10000011 ; present + writable + huge
-    mov [pd_table + ecx * 8], eax ; map ecx-th entry
+    mov [p2_table + ecx * 8], eax ; map ecx-th entry
 
     inc ecx            ; increase counter
     cmp ecx, 512       ; if counter == 512, the whole P2 table is mapped
-    jne .map_pd_table  ; else map the next entry
+    jne .map_p2_table  ; else map the next entry
 
     ret
 
 enable_paging:
     ; load PML4 to cr3 register (cpu uses this to access the P4 table)
-    mov eax, pml4_table
+    mov eax, p4_table
     mov cr3, eax
 
     ; enable PAE-flag in cr4 (Physical Address Extension)
@@ -155,14 +161,14 @@ error:
 
 section .bss
 align 4096
-pml4_table: ;p4_table
+p4_table: ;p4_table
     resb 4096
-pdp_table: ;p3_table
+p3_table: ;p3_table
     resb 4096
-pd_table: ;p2_table
+p2_table: ;p2_table
     resb 4096
 stack_bottom:
-    resb 64
+    resb 8 * 1024   ; reserve 8KB for the stack
 stack_top:
 
 section .rodata

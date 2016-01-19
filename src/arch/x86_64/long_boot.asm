@@ -4,8 +4,8 @@ section .text
 bits 64
 long_mode_start:
     ; call the rust main
-    extern main     ; new
-    call main       ; new
+    extern kmain     ; new
+    call kmain       ; new
 
     .os_returned:
     ; rust main returned, print `OS returned!`

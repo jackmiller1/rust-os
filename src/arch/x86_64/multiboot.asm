@@ -5,9 +5,7 @@ header_start:
     dd header_end - header_start    ; header length
 
     ; checksum
-    dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
-
-    ; add optional multiboot tags here
+    dd 0x100000000 - (0xE85250D6 + 0 + (header_end - header_start))
 
     ; ending tags
     dw 0    ; type
